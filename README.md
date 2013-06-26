@@ -9,4 +9,4 @@ To try it out:
 - Choose the folder you downloaded and make sure the extension is enabled.
 - Go to a PeerJ preprint, for example https://peerj.com/preprints/11, and wish for a side-by-side PDF view.
 - Click Show PDF in the toolbar to grant your wish. Click Hide PDF to take things back to normal.
-- 
+
