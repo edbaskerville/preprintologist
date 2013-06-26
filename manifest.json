@@ -1,0 +1,21 @@
+{
+  "manifest_version": 2,
+
+  "name": "Preprintologist",
+
+  "description": "This extension combines preprints with ology for an in-browser PDF experientology.",
+
+  "version": "0.1",
+
+  "permissions": [
+    "https://peerj.com/"
+  ],
+
+  "content_scripts": [
+    {
+      "matches": ["https://peerj.com/preprints/*/"],
+      "css" : ["preprintologist.css"],
+      "js": ["jquery-1.10.1.min.js", "preprintologist.js"]
+    }
+  ]
+}
