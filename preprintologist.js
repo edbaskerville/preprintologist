@@ -14,14 +14,17 @@ function peerjSetup() {
 		'<a id="togglePdfA" href="#" class="btn btn-primary">Show PDF</a>'
 	);
 
-	docUrl = document.URL;
+	pdfUrl = $('a[title="View as PDF"]').attr('href');
+
+	/*docUrl = document.URL.split('?')[0].split('#')[0];
+	console.log('docUrl: ' + docUrl);
 	pdfUrl = null;
-	if(docUrl.charAt[docUrl.length - 1] == '/') {
-		pdfUrl = docUrl.substring(0, docUrl.lastIndexOf("/")) + '.pdf';
+	if(docUrl.charAt(docUrl.length - 1) == '/') {
+		pdfUrl = docUrl.substring(0, docUrl.lastIndexOf("/") - 1) + '.pdf';
 	}
 	else {
 		pdfUrl = docUrl + '.pdf';
-	}
+	}*/
 
 	// Create div to move article content into when PDF is shown
 	$('body').append('<div id="outer"><div class="container"><div id="outerRow" class="row"></div></div></div>');
