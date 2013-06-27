@@ -4,5 +4,30 @@
 	padding: 0;
 	top: 0;
 	left: 0;
+	width: 500px;
+	height: 100%;
 	z-index: 100000;
+}
+
+#outer {
+	position: fixed;
+	margin: 0;
+	padding: 0;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	overflow: auto;
+}
+
+#resizer {
+	position: fixed;
+	margin: 0;
+	padding: 0;
+	top: 0;
+	left: 0;
+	width: 5px;
+	height: 100%;
+	background-color: rgb(144, 144, 144);
+	cursor: ew-resize;
 }
