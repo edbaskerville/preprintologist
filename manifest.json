@@ -13,7 +13,7 @@
 
   "content_scripts": [
     {
-      "matches": ["https://peerj.com/preprints/*/", "http://arxiv.org/abs/*"],
+      "matches": ["https://peerj.com/preprints/*", "http://arxiv.org/abs/*"],
       "css" : ["preprintologist.css"],
       "js": ["jquery-1.10.1.min.js", "preprintologist.js"]
     }

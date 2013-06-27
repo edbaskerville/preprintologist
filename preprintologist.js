@@ -7,82 +7,74 @@
 	Browser extension to show PDFs alongside PeerJ (and hopefully arXiv) metadata/discussion.
 */
 
-function makePeerJManager() {
+function peerjSetup() {
+	console.log('here');
 	// Insert Show/Hide Button
-	dividers = $('li.divider-vertical');
-	lastDivider = dividers.eq(dividers.length - 1);
-	lastDivider.parent().append('<li id="togglePdfBtn"><a id="togglePdfA" href="#">Show PDF</a></li>');
-	lastDivider.parent().append('<li class="divider-vertical"></li>');
+	$('article > .article-meta > .article-authors').after(
+		'<a id="togglePdfA" href="#" class="btn btn-primary">Show PDF</a>'
+	);
+
+	docUrl = document.URL;
+	pdfUrl = null;
+	if(docUrl.charAt[docUrl.length - 1] == '/') {
+		pdfUrl = docUrl.substring(0, docUrl.lastIndexOf("/")) + '.pdf';
+	}
+	else {
+		pdfUrl = docUrl + '.pdf';
+	}
+
+	// Create div to move article content into when PDF is shown
+	$('body').append('<div id="outer"><div class="container"><div id="outerRow" class="row"></div></div></div>');
+	$('#outer').hide();
+
+	// Create PDF view, initially hidden
+	$('body').append('<iframe frameborder="0" id="preprintPdf" src="' + pdfUrl + '"></iframe>');
+	$('#preprintPdf').hide();
+
+	// Create resizer, initially hidden
+	$('body').append('<div id="resizer"></div>');
+	$('#resizer').hide();
 
 	// Construct manager
-	manager = {
+	window.preprintManager = {
 		pdfShown: false,
 
 		showPdf : function() {
-			// Remove sidebars
-			$('.article-item-leftbar-wrap').hide();
-			$('.article-item-rightbar-wrap').hide();
+			// Remove sidebars and footer
+			$('#footer').css('display', 'none');
+			$('.article-item-leftbar-wrap').css('display', 'none');
+			$('.article-item-rightbar-wrap').css('display', 'none');
 
-			if($('#placeholder').length) {
-				$('#placeholder').show();
-			}
-			else {
-				$('#item-content').prepend('<div id="placeholder" class="span6"></div>');
-			}
-
-			// Make main content smaller
-			$('#article-item-middle').removeClass('span7');
-			$('#article-item-middle').addClass('span6');
-			$('#article-item-middle').addClass('offset6');
-
-			// Make feedback form smaller
-			feedbackForm = $('#item-feedback-form').parent();
-			feedbackForm.removeClass('span7');
-			feedbackForm.addClass('span6');
-			$('#peerj_feedbackbundle_feedbacktype_feedback').width(550);
-
-			if($('#preprintPdf').length) {
-				$('#preprintPdf').show();
-			}
-			else {
-				docUrl = document.URL;
-				pdfUrl = docUrl.substring(0, docUrl.lastIndexOf("/")) + '.pdf';
-
-				$('body').append('<iframe frameborder="0" id="preprintPdf" class="span7" src="' + pdfUrl + '"></iframe>');
-			}
-
-			this.pdfShown = true;
+			$('#preprintPdf').show();
+			$('#resizer').show();
 			$('#togglePdfA').text('Hide PDF');
 
-			this.scalePdf();
+			this.pdfShown = true;
+
+			$('#article-item-middle').appendTo($('#outerRow'));
+			$('#outer').show();
+
+			this.layout();
 		},
 
 		hidePdf : function() {
-			// Restore sidebars
-			$('.article-item-leftbar-wrap').show();
-			$('.article-item-rightbar-wrap').show();
-
-			// Hide placeholder
-			$('#placeholder').hide();
-
-			// Restore main content size
-			$('#article-item-middle').removeClass('span6');
-			$('#article-item-middle').removeClass('offset6');
-			$('#article-item-middle').addClass('span7');
-
-			// Restore feedback form size
-			feedbackForm = $('#item-feedback-form').parent();
-			feedbackForm.removeClass('span6');
-			feedbackForm.addClass('span7');
-			$('#peerj_feedbackbundle_feedbacktype_feedback').width(635);
+			// Restore sidebars and footer
+			$('#footer').css('display', '');
+			$('.article-item-leftbar-wrap').css('display', '');
+			$('.article-item-rightbar-wrap').css('display', '');
 
 			$('#preprintPdf').hide();
+			$('#resizer').hide();
+			$('#togglePdfA').text('Show PDF');
+
+			$('.article-item-leftbar-wrap').after($('#article-item-middle'));
+			$('#outer').hide();
 
 			this.pdfShown = false;
-			$('#togglePdfA').text('Show PDF');
 		},
 
 		togglePdf : function() {
+			console.log("toggling pdf");
 			if(this.pdfShown) {
 				this.hidePdf();
 			}
@@ -91,34 +83,39 @@ function makePeerJManager() {
 			}
 		},
 
-		scalePdf : function() {
+		layout : function() {
 			if(!this.pdfShown) {
 				return;
 			}
 
-			offset = $('#placeholder').offset();
-			width = offset.left + $('#placeholder').width();
+			navHeight = $('body .navbar').height();
+			windowHeight = $(window).height();
+			windowWidth = $(window).width();
+			pdfWidth = $('#preprintPdf').width();
 
 			// Adjust height based on navbar
-			navHeight = $('.navbar').height();
+			console.log('navHeight: ' + navHeight);
 			$('#preprintPdf').css('top', '' + navHeight + 'px');
-			$('#preprintPdf').width(width);
+			$('#preprintPdf').height(windowHeight - navHeight);
 
-			// Adjust bottom based on footer
-			scrollTop = $(document).scrollTop();
-			windowHeight = $(window).height();
-			footerTop = $('#footer').offset().top;
-			footerVisible = scrollTop + windowHeight - footerTop;
+			windowWidth = $(window).width();
+			console.log('windowWidth: ' + windowWidth);
+			resizerWidth = $('#resizer').width();
+			console.log('resizerWidth: ' + resizerWidth);
 
-			$('#preprintPdf').height($(window).height() - navHeight - (footerVisible > 0 ? footerVisible : 0));
+			// Position resizer
+			$('#resizer').css('left', '' + pdfWidth + 'px');
 
-			//$('#preprintPdf').height($(window).height() - offset.top - 10);
+			// Position main content
+			$('#outer').css('top', '' + navHeight + 'px');
+			$('#outer').height(windowHeight - navHeight);
+			$('#outer').css('left', '' + (pdfWidth + resizerWidth) + 'px');
+			$('#outer').css('width', '' + (windowWidth - pdfWidth - resizerWidth) + 'px');
 		}
 	}; // end of PeerJ manager object definition
-	return manager;
 }
 
-function makeArxivManager() {
+function arxivSetup() {
 	var pdfUrl = null;
 	$('#abs > .extra-services > .full-text > ul > li > a').each(function(index) {
 		if($(this).text() == 'PDF') {
@@ -130,7 +127,25 @@ function makeArxivManager() {
 		return null;
 	}
 
-	manager = {
+	// Insert Show PDF link
+	$('.extra-services').prepend('<div class="full-text"><h2><a href="#" id="togglePdfA">Show PDF</a></h2></div>');
+
+	// Put everything in body into an inner div
+	$('body').prepend('<div id="outer" class="outerArxiv"></div>');
+	$('#cu-identity').appendTo($('#outer'));
+	$('#header').appendTo($('#outer'));
+	$('#content').appendTo($('#outer'));
+	$('#footer').appendTo($('#outer'));
+
+	// Create PDF view, initially hidden
+	$('body').append('<embed frameborder="0" id="preprintPdf" src="' + pdfUrl + '"></iframe>');
+	$('#preprintPdf').hide();
+
+	// Create resizer, initially hidden
+	$('body').append('<div id="resizer"></div>');
+	$('#resizer').hide();
+
+	window.preprintManager = {
 		pdfShown : false,
 		resizing: false,
 
@@ -140,7 +155,7 @@ function makeArxivManager() {
 			$('#resizer').show();
 			$('#togglePdfA').text('Hide PDF');
 
-			this.scalePdf();
+			this.layout();
 		},
 
 		hidePdf : function() {
@@ -149,7 +164,7 @@ function makeArxivManager() {
 			$('#resizer').hide();
 			$('#togglePdfA').text('Show PDF');
 
-			this.scalePdf();
+			this.layout();
 		},
 
 		togglePdf : function() {
@@ -162,7 +177,7 @@ function makeArxivManager() {
 			}
 		},
 
-		scalePdf : function() {
+		layout : function() {
 			pdfWidth = $('#preprintPdf').width();
 			if(this.pdfShown) {
 				windowWidth = $(window).width();
@@ -183,23 +198,23 @@ function makeArxivManager() {
 			}
 		}
 	};
+}
 
-	$('.extra-services').prepend('<div class="full-text"><h2><a href="#" id="togglePdfA">Show PDF</a></h2></div>');
+$(document).ready(function() {
+	if(document.domain == 'peerj.com') {
+		if(document.URL.charAt(document.URL.length - 1) != '/') {
+			pieces = document.URL.split('/');
+			if(pieces[pieces.length - 1].split('.').length > 1) {
+				return;
+			}
+		}
 
-	// Put everything in body into an inner div
-	$('body').prepend('<div id="outer"></div>');
-	$('#cu-identity').appendTo($('#outer'));
-	$('#header').appendTo($('#outer'));
-	$('#content').appendTo($('#outer'));
-	$('#footer').appendTo($('#outer'));
-
-	// Create PDF view, initially hidden
-	$('body').append('<embed frameborder="0" id="preprintPdf" src="' + pdfUrl + '"></iframe>');
-	$('#preprintPdf').hide();
-
-	// Create resizer, initially hidden
-	$('body').append('<div id="resizer"></div>');
-	$('#resizer').hide();
+		peerjSetup();
+	}
+	else if(document.domain == 'arxiv.org') {
+		arxivSetup();
+	}
+	manager = window.preprintManager;
 
 	$('#resizer').mousedown(function(event) {
 		manager.widthStart = $('#preprintPdf').width();
@@ -208,6 +223,7 @@ function makeArxivManager() {
 		$('#preprintPdf').css('pointer-events', 'none');
 		$('#outer').css('pointer-events', 'none');
 	});
+
 	$(window).mousemove(function(event) {
 		if(manager.resizing) {
 			delta = event.pageX - manager.mouseStart;
@@ -222,35 +238,24 @@ function makeArxivManager() {
 			}
 
 			$('#preprintPdf').width(pdfWidth);
-			manager.scalePdf();
+			manager.layout();
 		}
 	});
 	$(window).mouseup(function(event) {
 		if(manager.resizing) {
 			manager.resizing = false;
-			$('#preprintPdf').css('pointer-events', 'auto');
-			$('#outer').css('pointer-events', 'auto');
+			$('#preprintPdf').css('pointer-events', '');
+			$('#outer').css('pointer-events', '');
 		}
 	});
 
-	return manager;
-}
-
-$(document).ready(function() {
-	if(document.domain == 'peerj.com') {
-		window.preprintManager = makePeerJManager();
-	}
-	else if(document.domain == 'arxiv.org') {
-		window.preprintManager = makeArxivManager();
-	}
-
 	$('#togglePdfA').click(function() { window.preprintManager.togglePdf(); });
-});
 
-$(window).resize(function(){
-    window.preprintManager.scalePdf();
-});
+	$(window).resize(function(){
+	    window.preprintManager.layout();
+	});
 
-$(window).scroll(function() {
-	window.preprintManager.scalePdf();
+	$(window).scroll(function() {
+		window.preprintManager.layout();
+	});
 });
