@@ -52,9 +52,9 @@ function makePeerJManager() {
 			}
 
 			this.pdfShown = true;
-			scalePdf();
-
 			$('#togglePdfA').text('Hide PDF');
+
+			this.scalePdf();
 		},
 
 		hidePdf : function() {
@@ -220,7 +220,7 @@ function makeArxivManager() {
 			if(pdfWidth > maxWidth) {
 				pdfWidth = maxWidth;
 			}
-			
+
 			$('#preprintPdf').width(pdfWidth);
 			manager.scalePdf();
 		}
