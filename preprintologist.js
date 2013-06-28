@@ -210,11 +210,12 @@ $(document).ready(function() {
 	manager = window.preprintManager;
 
 	$('#resizer').mousedown(function(event) {
+		event.preventDefault();
+
 		manager.widthStart = $('#preprintPdf').width();
 		manager.mouseStart = event.pageX;
 		manager.resizing = true;
 		$('#preprintPdf').css('pointer-events', 'none');
-		$('#outer').css('pointer-events', 'none');
 	});
 
 	$(window).mousemove(function(event) {
@@ -238,7 +239,6 @@ $(document).ready(function() {
 		if(manager.resizing) {
 			manager.resizing = false;
 			$('#preprintPdf').css('pointer-events', '');
-			$('#outer').css('pointer-events', '');
 		}
 	});
 
